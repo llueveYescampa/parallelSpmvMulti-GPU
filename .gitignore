@@ -1,0 +1,10 @@
+# build directories #
+###################
+Build*
+.cproject
+.project
+.settings/
+matrices
+
+
+/buildCuda/
