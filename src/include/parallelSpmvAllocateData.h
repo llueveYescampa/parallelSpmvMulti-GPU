@@ -40,30 +40,34 @@
         v_off_d = (real **) malloc(ngpus * sizeof(real *));
     } // end if //
     
-    meanNnzPerRow = (real**) malloc(ngpus*sizeof(real *));  
-    sd            = (real**) malloc(ngpus*sizeof(real *));  
-    block = (dim3 **) malloc(ngpus*sizeof(dim3 *)); 
-    grid  = (dim3 **) malloc(ngpus*sizeof(dim3 *)); 
-    sharedMemorySize = (size_t *) calloc(ngpus, sizeof(size_t)); 
+    meanNnzPerRow0 = (real*) malloc(ngpus*sizeof(real));
+    meanNnzPerRow1 = (real*) malloc(ngpus*sizeof(real));
+    
+    sd0            = (real*) malloc(ngpus*sizeof(real ));
+    sd1            = (real*) malloc(ngpus*sizeof(real ));
+    
+    block0 = (dim3 *) malloc(ngpus*sizeof(dim3 )); 
+    block1 = (dim3 *) malloc(ngpus*sizeof(dim3 )); 
+    grid0  = (dim3 *) malloc(ngpus*sizeof(dim3 )); 
+    grid1  = (dim3 *) malloc(ngpus*sizeof(dim3 )); 
+    sharedMemorySize0 = (size_t *) calloc(ngpus, sizeof(size_t)); 
+    sharedMemorySize1 = (size_t *) calloc(ngpus, sizeof(size_t)); 
 
     for (int gpu=0; gpu<ngpus; ++gpu) {
-        meanNnzPerRow[gpu] = (real *) malloc(2*sizeof(real));
-        sd[gpu]            = (real *) malloc(2*sizeof(real));
-        block[gpu]         = (dim3 *) malloc(2*sizeof(dim3));
-        block[gpu][0].x = basicSize;
-        block[gpu][0].y = 1;
-        block[gpu][0].z = 1;
-        block[gpu][1].x = basicSize;
-        block[gpu][1].y = 1;
-        block[gpu][1].z = 1;
         
-        grid[gpu]          = (dim3 *) malloc(2*sizeof(dim3));
-        grid[gpu][0].x = 1;
-        grid[gpu][0].y = 1;
-        grid[gpu][0].z = 1;
-        grid[gpu][1].x = 1;
-        grid[gpu][1].y = 1;
-        grid[gpu][1].z = 1;
+        block0[gpu].x = basicSize;
+        block0[gpu].y = 1;
+        block0[gpu].z = 1;
+        block1[gpu].x = basicSize;
+        block1[gpu].y = 1;
+        block1[gpu].z = 1;
+        
+        grid0[gpu].x = 1;
+        grid0[gpu].y = 1;
+        grid0[gpu].z = 1;
+        grid1[gpu].x = 1;
+        grid1[gpu].y = 1;
+        grid1[gpu].z = 1;
     } // end for //
     
     stream = (cudaStream_t *) malloc(sizeof(cudaStream_t) * ngpus);

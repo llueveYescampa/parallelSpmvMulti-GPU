@@ -41,12 +41,17 @@
 
     const int basicSize = 32;
     const real parameter2Adjust = 0.5;
-    size_t *sharedMemorySize=NULL;
+    size_t *sharedMemorySize0=NULL;
+    size_t *sharedMemorySize1=NULL;
     
-    real **meanNnzPerRow=NULL;
-    real **sd=NULL;
+    real *meanNnzPerRow0=NULL;
+    real *meanNnzPerRow1=NULL;
+    real *sd0=NULL;
+    real *sd1=NULL;
     
-    dim3 **block=NULL;
-    dim3 **grid=NULL;
+    dim3 *block0=NULL;
+    dim3 *block1=NULL;
+    dim3 *grid0=NULL;
+    dim3 *grid1=NULL;
 
     cudaStream_t *stream=NULL;

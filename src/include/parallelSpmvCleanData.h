@@ -22,11 +22,6 @@
         cudaFree(v_d[gpu]);
         cudaFree(w_d[gpu]);
 
-        free(meanNnzPerRow[gpu]);
-        free(sd[gpu]);
-        free(block[gpu]);
-        free(grid[gpu]);
-        
 //        if ( off_proc_nnz[gpu] ) {
         if ( ngpus > 1) {
             free(row_ptr_off[gpu]);
@@ -66,12 +61,17 @@
     free(val_d);
 
 
-    free(meanNnzPerRow);
-    free(sd);
-    free(sharedMemorySize);
+    free(meanNnzPerRow0);
+    free(meanNnzPerRow1);
+    free(sd0);
+    free(sd1);
+    free(sharedMemorySize0);
+    free(sharedMemorySize1);
     
-    free(block);
-    free(grid);
+    free(block0);
+    free(block1);
+    free(grid0);
+    free(grid1);
 
     if (ngpus > 1) {
         free(row_ptr_off);

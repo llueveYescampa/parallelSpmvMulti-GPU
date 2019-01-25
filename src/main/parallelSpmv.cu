@@ -127,14 +127,14 @@ int main(int argc, char *argv[])
         for (int row=0; row<n[gpu]; ++row) {
             temp[row] = row_ptr[gpu][row+1] - row_ptr[gpu][row];
         } // end for //
-        meanAndSd(&meanNnzPerRow[gpu][0],&sd[gpu][0],temp,n[gpu]);
-//printf("file: %s, line: %d, gpu on-prcoc:   %d, mean: %7.3f, sd: %7.3f using: %s \n", __FILE__, __LINE__, gpu , meanNnzPerRow[gpu][0], sd[gpu][0], (meanNnzPerRow[gpu][0] + 0.5*sd[gpu][0] < 32) ? "spmv0": "spmv1");
+        meanAndSd(&meanNnzPerRow0[gpu],&sd0[gpu],temp,n[gpu]);
+//printf("file: %s, line: %d, gpu on-prcoc:   %d, mean: %7.3f, sd: %7.3f using: %s \n", __FILE__, __LINE__, gpu , meanNnzPerRow0[gpu], sd0[gpu], (meanNnzPerRow0[gpu] + 0.5*sd0[gpu] < 32) ? "spmv0": "spmv1");
         if (nColsOff[gpu]) {
             for (int row=0; row<n[gpu]; ++row) {
                 temp[row] = row_ptr_off[gpu][row+1] - row_ptr_off[gpu][row];
             } // end for //
-            meanAndSd(&meanNnzPerRow[gpu][1],&sd[gpu][1],temp,n[gpu]);
-//printf("file: %s, line: %d, gpu off-prcoc:  %d, mean: %7.3f, sd: %7.3f using: %s \n", __FILE__, __LINE__, gpu , meanNnzPerRow[gpu][1], sd[gpu][1], (meanNnzPerRow[gpu][1] + 0.5*sd[gpu][1] < 32) ? "spmv0": "spmv1");
+            meanAndSd(&meanNnzPerRow1[gpu],&sd1[gpu],temp,n[gpu]);
+//printf("file: %s, line: %d, gpu off-prcoc:  %d, mean: %7.3f, sd: %7.3f using: %s \n", __FILE__, __LINE__, gpu , meanNnzPerRow1[gpu], sd1[gpu], (meanNnzPerRow1[gpu] + 0.5*sd1[gpu] < 32) ? "spmv0": "spmv1");
         } // end if //        
         free(temp);
         /////////////////////////////////////////////////////
@@ -218,35 +218,35 @@ int main(int argc, char *argv[])
 
 
         printf("In GPU: %d\n",gpu);
-        if (meanNnzPerRow[gpu][0] + parameter2Adjust*sd[gpu][0] < basicSize) {
+        if (meanNnzPerRow0[gpu] + parameter2Adjust*sd0[gpu] < basicSize) {
         	// these mean use scalar spmv
-            grid[gpu][0].x = ( (n[gpu] + block[gpu][0].x -1) /block[gpu][0].x );
-            printf("using scalar spmv for on matrix,  blockSize: [%d, %d] %f, %f\n",block[gpu][0].x,block[gpu][0].y, meanNnzPerRow[gpu][0], sd[gpu][0]) ;
+            grid0[gpu].x = ( (n[gpu] + block0[gpu].x -1) /block0[gpu].x );
+            printf("using scalar spmv for on matrix,  blockSize: [%d, %d] %f, %f\n",block0[gpu].x,block0[gpu].y, meanNnzPerRow0[gpu], sd0[gpu]) ;
         } else {
             // these mean use vector spmv
-            if (meanNnzPerRow[gpu][0] >= 2*basicSize) {
-                block[gpu][0].x = 2*basicSize;
+            if (meanNnzPerRow0[gpu] >= 2*basicSize) {
+                block0[gpu].x = 2*basicSize;
             } // end if //
-            block[gpu][0].y=MAXTHREADS/block[gpu][0].x;
-            grid[gpu][0].x = ( (n[gpu] + block[gpu][0].y - 1) / block[gpu][0].y ) ;
-        	sharedMemorySize[gpu]=block[gpu][0].x*block[gpu][0].y*sizeof(real);
-            printf("using vector spmv for on matrix,  blockSize: [%d, %d] %f, %f\n",block[gpu][0].x,block[gpu][0].y, meanNnzPerRow[gpu][0], sd[gpu][0]) ;
+            block0[gpu].y=MAXTHREADS/block0[gpu].x;
+            grid0[gpu].x = ( (n[gpu] + block0[gpu].y - 1) / block0[gpu].y ) ;
+        	sharedMemorySize0[gpu]=block0[gpu].x*block0[gpu].y*sizeof(real);
+            printf("using vector spmv for on matrix,  blockSize: [%d, %d] %f, %f\n",block0[gpu].x,block0[gpu].y, meanNnzPerRow0[gpu], sd0[gpu]) ;
         } // end if // 
 
         if (ngpus > 1) {
-            if (meanNnzPerRow[gpu][1] + parameter2Adjust*sd[gpu][1] < basicSize) {
+            if (meanNnzPerRow1[gpu] + parameter2Adjust*sd1[gpu] < basicSize) {
             	// these mean use scalar spmv
-                grid[gpu][1].x = ( (n[gpu] + block[gpu][1].x -1) /block[gpu][1].x );
-                printf("using scalar spmv for off matrix, blockSize: [%d, %d] %f, %f\n",block[gpu][1].x,block[gpu][1].y, meanNnzPerRow[gpu][1], sd[gpu][1]) ;
+                grid1[gpu].x = ( (n[gpu] + block1[gpu].x -1) /block1[gpu].x );
+                printf("using scalar spmv for off matrix, blockSize: [%d, %d] %f, %f\n",block1[gpu].x,block1[gpu].y, meanNnzPerRow1[gpu], sd1[gpu]) ;
             } else {
                 // these mean use vector spmv
-                if (meanNnzPerRow[gpu][1] >= 2*basicSize) {
-                    block[gpu][1].x = 2*basicSize;
+                if (meanNnzPerRow1[gpu] >= 2*basicSize) {
+                    block1[gpu].x = 2*basicSize;
                 } // end if //
-                block[gpu][1].y=MAXTHREADS/block[gpu][1].x;
-                grid[gpu][1].x = ( (n[gpu] + block[gpu][1].y - 1) / block[gpu][1].y ) ;
-            	sharedMemorySize[gpu]=block[gpu][1].x*block[gpu][1].y*sizeof(real);
-                printf("using vector spmv for off matrix, blockSize: [%d, %d] %f, %f\n",block[gpu][1].x,block[gpu][1].y, meanNnzPerRow[gpu][1], sd[gpu][1]) ;
+                block1[gpu].y=MAXTHREADS/block1[gpu].x;
+                grid1[gpu].x = ( (n[gpu] + block1[gpu].y - 1) / block1[gpu].y ) ;
+            	sharedMemorySize1[gpu]=block1[gpu].x*block1[gpu].y*sizeof(real);
+                printf("using vector spmv for off matrix, blockSize: [%d, %d] %f, %f\n",block1[gpu].x,block1[gpu].y, meanNnzPerRow1[gpu], sd1[gpu]) ;
             } // end if // 
         }
         
@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
             
             cuda_ret = cudaBindTexture(NULL, xTex,   v_d[gpu],   n[gpu]           * sizeof(real));
             cuda_ret = cudaBindTexture(NULL, valTex, val_d[gpu], on_proc_nnz[gpu] * sizeof(real));
-            spmv<<<grid[gpu][0], block[gpu][0], sharedMemorySize[gpu],stream[gpu]>>>(w_d[gpu],  row_ptr_d[gpu], col_idx_d[gpu], n[gpu]);
+            spmv<<<grid0[gpu], block0[gpu], sharedMemorySize0[gpu],stream[gpu]>>>(w_d[gpu],  row_ptr_d[gpu], col_idx_d[gpu], n[gpu]);
             cuda_ret = cudaUnbindTexture(xTex);
             cuda_ret = cudaUnbindTexture(valTex);
             
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
             
                 cuda_ret = cudaBindTexture(NULL, xTex,   v_off_d[gpu],   nColsOff[gpu]     * sizeof(real));
                 cuda_ret = cudaBindTexture(NULL, valTex, val_off_d[gpu], off_proc_nnz[gpu] * sizeof(real));
-                spmv<<<grid[gpu][1], block[gpu][1], sharedMemorySize[gpu], stream[gpu]  >>>(w_d[gpu],  row_ptr_off_d[gpu], col_idx_off_d[gpu], n[gpu]);
+                spmv<<<grid1[gpu], block1[gpu], sharedMemorySize1[gpu], stream[gpu]  >>>(w_d[gpu],  row_ptr_off_d[gpu], col_idx_off_d[gpu], n[gpu]);
                 cuda_ret = cudaUnbindTexture(xTex);
                 cuda_ret = cudaUnbindTexture(valTex);
                 
