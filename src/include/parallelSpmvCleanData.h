@@ -36,12 +36,10 @@
             
             free(recvSendCount[gpu]);            
         } // end if //
-        cudaStreamDestroy(stream0[gpu]);
-        cudaStreamDestroy(stream1[gpu]);
+        cudaStreamDestroy(stream[gpu]);
     } // end for /
     free(recvSendCount);
-    free(stream0);
-    free(stream1);
+    free(stream);
     
 
     free(v);

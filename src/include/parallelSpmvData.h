@@ -54,5 +54,4 @@
     dim3 *grid0=NULL;
     dim3 *grid1=NULL;
 
-    cudaStream_t *stream0=NULL;
-    cudaStream_t *stream1=NULL;
+    cudaStream_t *stream=NULL;

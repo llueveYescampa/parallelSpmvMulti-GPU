@@ -70,6 +70,5 @@
         grid1[gpu].z = 1;
     } // end for //
     
-    stream0 = (cudaStream_t *) malloc(sizeof(cudaStream_t) * ngpus);
-    stream1 = (cudaStream_t *) malloc(sizeof(cudaStream_t) * ngpus);
+    stream = (cudaStream_t *) malloc(sizeof(cudaStream_t) * ngpus);
     // end of allocating external arrays depending on number of gpus
