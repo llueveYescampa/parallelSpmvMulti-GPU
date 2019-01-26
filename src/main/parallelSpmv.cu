@@ -121,13 +121,11 @@ int main(int argc, char *argv[])
         cuda_ret = cudaStreamCreateWithFlags(&stream1[gpu], cudaStreamNonBlocking ) ;
         if(cuda_ret != cudaSuccess) FATAL("Unable to create stream1 ");
         
-        //w[gpu]     = (real *) malloc((n[gpu])*sizeof(real)); 
-        //v[gpu]     = (real *) malloc((n[gpu])*sizeof(real));
         cudaHostAlloc((real **)&v[gpu], n[gpu]*sizeof(real),cudaHostAllocDefault);
         cudaHostAlloc((real **)&w[gpu], n[gpu]*sizeof(real),cudaHostAllocDefault);
         vectorReader(v[gpu], &gpu, n, argv[2]);
         
-        if (ngpus > 1) v_off[gpu] = (real *) malloc(nColsOff[gpu]*sizeof(real));
+        if (ngpus > 1) cudaHostAlloc((real **)&v_off[gpu]  , nColsOff[gpu]*sizeof(real),cudaHostAllocDefault);
 
 
         /////////////////////////////////////////////////////

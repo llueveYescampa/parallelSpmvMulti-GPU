@@ -10,8 +10,8 @@
         free(col_idx[gpu]);
         free(val[gpu]);
 
-        cudaFreeHost(w);
-        cudaFreeHost(v);
+        cudaFreeHost(w[gpu]);
+        cudaFreeHost(v[gpu]);
         //free(v[gpu]);
         //free(w[gpu]);
 
@@ -27,7 +27,7 @@
             free(row_ptr_off[gpu]);
             free(col_idx_off[gpu]);
             free(val_off[gpu]);
-            free(v_off[gpu]);
+            cudaFreeHost(v_off[gpu]);
             
             cudaFree(row_ptr_off_d[gpu]);
             cudaFree(col_idx_off_d[gpu]);
