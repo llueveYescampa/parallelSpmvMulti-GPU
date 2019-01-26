@@ -314,13 +314,6 @@ int main(int argc, char *argv[])
             cuda_ret = cudaMemcpyAsync(w[gpu], w_d[gpu], n[gpu]*sizeof(real),cudaMemcpyDeviceToHost,stream0[gpu]);
             if(cuda_ret != cudaSuccess) FATAL("Unable to copy memory to device matrix y_d back to host");
         } // end for //
-
-        for (int gpu=0; gpu<ngpus; ++gpu) {
-            cudaSetDevice(gpu);
-            cudaStreamSynchronize(stream0[gpu]);
-            cudaStreamSynchronize(stream1[gpu]);
-        } // end for //
-
     } // end for //
     
     gettimeofday(&tp,NULL);
