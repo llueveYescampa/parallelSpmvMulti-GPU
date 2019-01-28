@@ -108,19 +108,21 @@ int main(int argc, char *argv[])
     
     // ready to start //    
     
-
+    int totalNNZ=0;
     for (int gpu=0; gpu<ngpus; ++gpu) {
+        totalNNZ+=on_proc_nnz[gpu];
+        totalNNZ+=off_proc_nnz[gpu];
+        
         cuda_ret = cudaSetDevice(gpu);
         if(cuda_ret != cudaSuccess) FATAL("Unable to set gpu");
     
-        //cuda_ret = cudaStreamCreateWithFlags(&stream0[gpu], cudaStreamDefault) ;
+        //cuda_ret = cudaStreamCreateWithFlags(&stream0[gpu], cudaStreamDefault);
         cuda_ret = cudaStreamCreateWithFlags(&stream[gpu], cudaStreamNonBlocking ) ;
         if(cuda_ret != cudaSuccess) FATAL("Unable to create stream0 ");
-    
-        cudaHostAlloc((real **)&v[gpu], n[gpu]*sizeof(real),cudaHostAllocDefault);
-        cudaHostAlloc((real **)&w[gpu], n[gpu]*sizeof(real),cudaHostAllocDefault);
-        vectorReader(v[gpu], &gpu, n, argv[2]);
         
+        v[gpu] = (real *) malloc((n[gpu])*sizeof(real));
+        w[gpu] = (real *) malloc((n[gpu])*sizeof(real));
+        vectorReader(v[gpu], &gpu, n, argv[2]);
         if (ngpus > 1) cudaHostAlloc((real **)&v_off[gpu]  , nColsOff[gpu]*sizeof(real),cudaHostAllocDefault);
 
 
@@ -210,15 +212,10 @@ int main(int argc, char *argv[])
             cuda_ret = cudaMalloc((void **) &v_off_d[gpu],  nColsOff[gpu] *sizeof(real));
             if(cuda_ret != cudaSuccess) FATAL("Unable to allocate device memory for v_off_d");
 
-            // Copy the input vector to device
-            cuda_ret = cudaMemcpy(v_off_d[gpu], v_off[gpu], nColsOff[gpu]*sizeof(real),cudaMemcpyHostToDevice);
-            if(cuda_ret != cudaSuccess) FATAL("Unable to copy memory to device matrix v_d");
-
         } // end if //
 
 
 /////////////////////////////////////////////////////////////////////////
-
 
         printf("In GPU: %d\n",gpu);
         if (meanNnzPerRow0[gpu] + parameter2Adjust*sd0[gpu] < basicSize) {
@@ -252,9 +249,7 @@ int main(int argc, char *argv[])
                 printf("using vector spmv for off matrix, blockSize: [%d, %d] %f, %f\n",block1[gpu].x,block1[gpu].y, meanNnzPerRow1[gpu], sd1[gpu]) ;
             } // end if // 
         }
-        
     } // end for //
-
 
     // Timing should begin here//
     struct timeval tp;                                   // timer
@@ -264,17 +259,13 @@ int main(int argc, char *argv[])
     elapsed_time = -(tp.tv_sec*1.0e6 + tp.tv_usec);
     
     for (int t=0; t<REP; ++t) {
-    
         // send the first spmv
         for (int gpu=0; gpu<ngpus; ++gpu) {
             cudaSetDevice(gpu);
         
-            cuda_ret = cudaMemsetAsync(w_d[gpu], 0, sizeof(real)*n[gpu],stream[gpu] );
+            cuda_ret = cudaMemset(w_d[gpu], 0, sizeof(real)*n[gpu] );
             if(cuda_ret != cudaSuccess) FATAL("Unable to set device for matrix w_d[gpu]");
 
-            cuda_ret = cudaMemcpyAsync(v_d[gpu], v[gpu], n[gpu]*sizeof(real),cudaMemcpyHostToDevice) ;
-            if(cuda_ret != cudaSuccess) FATAL("Unable to copy memory to device array v_d");
-            
             cuda_ret = cudaBindTexture(NULL, xTex0,   v_d[gpu],   n[gpu]           * sizeof(real));
             cuda_ret = cudaBindTexture(NULL, valTex0, val_d[gpu], on_proc_nnz[gpu] * sizeof(real));
             spmv<<<grid0[gpu], block0[gpu], sharedMemorySize0[gpu]>>>(w_d[gpu],  row_ptr_d[gpu], col_idx_d[gpu], n[gpu],0);
@@ -305,15 +296,21 @@ int main(int argc, char *argv[])
             cudaSetDevice(gpu);
             cudaStreamSynchronize(NULL);
             cudaStreamSynchronize(stream[gpu]);
-            //cudaStreamSynchronize(stream1[gpu]);
-            cuda_ret = cudaMemcpyAsync(w[gpu], w_d[gpu], n[gpu]*sizeof(real),cudaMemcpyDeviceToHost,stream[gpu]);
-            if(cuda_ret != cudaSuccess) FATAL("Unable to copy memory to device matrix y_d back to host");
         } // end for //
     } // end for //
     
     gettimeofday(&tp,NULL);
     elapsed_time += (tp.tv_sec*1.0e6 + tp.tv_usec);
-    printf ("Total time was %f seconds.\n", elapsed_time*1.0e-6);
+    printf ("Total time was %f seconds, GFLOPS: %f\n", elapsed_time*1.0e-6,  2.0*totalNNZ*REP*1.0e-3/elapsed_time  );
+    
+    for (int gpu=0; gpu<ngpus; ++gpu) {
+        cudaSetDevice(gpu);
+        cuda_ret = cudaMemcpy(w[gpu], w_d[gpu], n[gpu]*sizeof(real),cudaMemcpyDeviceToHost);
+        if(cuda_ret != cudaSuccess) FATAL("Unable to copy memory to device matrix y_d back to host");
+    } // end for //
+
+
+
 
     if (checkSol=='t') {
 
