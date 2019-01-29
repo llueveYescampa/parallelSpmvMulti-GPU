@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
             
                 cuda_ret = cudaBindTexture(NULL, xTex,   v_off_d[gpu],   nColsOff[gpu]     * sizeof(real));
                 cuda_ret = cudaBindTexture(NULL, valTex, val_off_d[gpu], off_proc_nnz[gpu] * sizeof(real));
-                spmv<<<grid1[gpu], block1[gpu], sharedMemorySize1[gpu] ,stream[gpu] >>>(w_d[gpu],  row_ptr_off_d[gpu], col_idx_off_d[gpu], n[gpu]);
+                spmv<<<grid1[gpu], block1[gpu], sharedMemorySize1[gpu],stream[gpu] >>>(w_d[gpu],  row_ptr_off_d[gpu], col_idx_off_d[gpu], n[gpu]);
                 cuda_ret = cudaUnbindTexture(xTex);
                 cuda_ret = cudaUnbindTexture(valTex);
                 
