@@ -21,14 +21,14 @@ void startComunication(real **x_ptr,
                        const int *ngpus
                         );
 
-__global__ void spmv(real *__restrict__ y, 
-                     //real *__restrict__ x, 
-                     //real *__restrict__ val,  
-                     int  *__restrict__ row_ptr, 
-                     int  *__restrict__ col_idx, 
-                     const int nRows,
-                     const int type
-                     );
+__global__ 
+void spmv(real *__restrict__ y, 
+         //real *__restrict__ x, 
+         //real *__restrict__ val,  
+         int  *__restrict__ row_ptr, 
+         int  *__restrict__ col_idx, 
+         const int nRows
+         );
 
 //void spmv(real *b, real *__restrict__ val, real *x, int *row_ptr, int *col_idx, int nRows);
 

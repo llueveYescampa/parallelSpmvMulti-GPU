@@ -11,17 +11,11 @@
 #define REP 1000
 
 #ifdef DOUBLE
-    texture<int2>  xTex0;
-    texture<int2>  valTex0;
-
-    texture<int2>  xTex1;
-    texture<int2>  valTex1;
+    texture<int2>  xTex;
+    texture<int2>  valTex;
 #else
-    texture<float> xTex0;
-    texture<float> valTex0;
-
-    texture<float> xTex1;
-    texture<float> valTex1;
+    texture<float> xTex;
+    texture<float> valTex;
 #endif
 
 void meanAndSd(real *mean, real *sd,real *data, int n)
@@ -266,11 +260,11 @@ int main(int argc, char *argv[])
             cuda_ret = cudaMemset(w_d[gpu], 0, sizeof(real)*n[gpu] );
             if(cuda_ret != cudaSuccess) FATAL("Unable to set device for matrix w_d[gpu]");
 
-            cuda_ret = cudaBindTexture(NULL, xTex0,   v_d[gpu],   n[gpu]           * sizeof(real));
-            cuda_ret = cudaBindTexture(NULL, valTex0, val_d[gpu], on_proc_nnz[gpu] * sizeof(real));
-            spmv<<<grid0[gpu], block0[gpu], sharedMemorySize0[gpu]>>>(w_d[gpu],  row_ptr_d[gpu], col_idx_d[gpu], n[gpu],0);
-            cuda_ret = cudaUnbindTexture(xTex0);
-            cuda_ret = cudaUnbindTexture(valTex0);
+            cuda_ret = cudaBindTexture(NULL, xTex,   v_d[gpu],   n[gpu]           * sizeof(real));
+            cuda_ret = cudaBindTexture(NULL, valTex, val_d[gpu], on_proc_nnz[gpu] * sizeof(real));
+            spmv<<<grid0[gpu], block0[gpu], sharedMemorySize0[gpu]>>>(w_d[gpu],  row_ptr_d[gpu], col_idx_d[gpu], n[gpu]);
+            cuda_ret = cudaUnbindTexture(xTex);
+            cuda_ret = cudaUnbindTexture(valTex);
             
         } // end for //
         
@@ -283,11 +277,11 @@ int main(int argc, char *argv[])
                 cuda_ret = cudaMemcpyAsync(v_off_d[gpu], v_off[gpu], nColsOff[gpu]*sizeof(real),cudaMemcpyHostToDevice,stream[gpu] ) ;
                 if(cuda_ret != cudaSuccess) FATAL("Unable to copy memory to device array v_off_d");
             
-                cuda_ret = cudaBindTexture(NULL, xTex1,   v_off_d[gpu],   nColsOff[gpu]     * sizeof(real));
-                cuda_ret = cudaBindTexture(NULL, valTex1, val_off_d[gpu], off_proc_nnz[gpu] * sizeof(real));
-                spmv<<<grid1[gpu], block1[gpu], sharedMemorySize1[gpu] ,stream[gpu] >>>(w_d[gpu],  row_ptr_off_d[gpu], col_idx_off_d[gpu], n[gpu], 1);
-                cuda_ret = cudaUnbindTexture(xTex1);
-                cuda_ret = cudaUnbindTexture(valTex1);
+                cuda_ret = cudaBindTexture(NULL, xTex,   v_off_d[gpu],   nColsOff[gpu]     * sizeof(real));
+                cuda_ret = cudaBindTexture(NULL, valTex, val_off_d[gpu], off_proc_nnz[gpu] * sizeof(real));
+                spmv<<<grid1[gpu], block1[gpu], sharedMemorySize1[gpu] ,stream[gpu] >>>(w_d[gpu],  row_ptr_off_d[gpu], col_idx_off_d[gpu], n[gpu]);
+                cuda_ret = cudaUnbindTexture(xTex);
+                cuda_ret = cudaUnbindTexture(valTex);
                 
             } // end for //
         } // end if //
