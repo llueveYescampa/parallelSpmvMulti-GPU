@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
             int row=0;
             real tolerance = 1.0e-08;
             if (sizeof(real) != sizeof(double) ) {
-                tolerance = 1.0e-03;
+                tolerance = 1.0e-02;
             } // end if //
             real error;
 
