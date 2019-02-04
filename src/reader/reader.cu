@@ -113,27 +113,27 @@ void reader( int **rowsPerGpu,
         // read the rows pointers fot each gpu 
 
         // read the vals one by one for each gpu
-        offset=(3 + n_global + nnz_global  ) * sizeof(int) + offsetC[gpu] * sizeof(real);
+        offset=(3 + n_global + nnz_global  ) * sizeof(int) + offsetC[gpu] * sizeof(double);
         fseek(filePtr, offset, SEEK_SET);
     
         for (int i=1,k=0,on=0,off=0; i<= (*rowsPerGpu)[gpu]; ++i) {
             int nnzPR = rows_Ptr[i] - rows_Ptr[i-1];
             int rowCounterOn=0;
             int rowCounterOff=0;
-            real temp;
+            double temp;
             for (int j=0; j<nnzPR; ++j, ++k ) {
-                if ( !fread(&temp, sizeof(real), (size_t) (1), filePtr)) exit(0);
+                if ( !fread(&temp, sizeof(double), (size_t) (1), filePtr)) exit(0);
                 if (cols_Ptr[k] >=  fColumn[gpu]  &&  cols_Ptr[k] <=  lColumn[gpu]  ) {
                     // on process data goes here
                     ++rowCounterOn;
                     (*colIdx)[gpu][on] = cols_Ptr[k] - fColumn[gpu];
-                    (*val)[gpu][on] = temp;
+                    (*val)[gpu][on] = (real) temp;
                     ++on;
                 } else {
                     // off process data goes here
                     ++rowCounterOff;
                     (*colIdxO)[gpu][off] = cols_Ptr[k];
-                    (*valO)[gpu][off] = temp;
+                    (*valO)[gpu][off] = (real) temp;
                     ++off;
                 } // end if 
             } // end for //

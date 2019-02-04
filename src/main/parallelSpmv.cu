@@ -309,7 +309,10 @@ int main(int argc, char *argv[])
             vectorReader(sol, &gpu, n, argv[3]);
             
             int row=0;
-            const real tolerance=1.0e-08;
+            real tolerance = 1.0e-08;
+            if (sizeof(real) != sizeof(double) ) {
+                tolerance = 1.0e-03;
+            } // end if //
             real error;
 
             do {
