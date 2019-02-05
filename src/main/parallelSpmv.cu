@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
         exit(0);
     } // end if //
 
+    printf("%s Precision. Solving using %d %s\n", (sizeof(real) == sizeof(double)) ? "Double": "Single", ngpus, (ngpus > 1) ? "GPUs": "GPU"  );
 
     #include "parallelSpmvAllocateData.h" 
     
