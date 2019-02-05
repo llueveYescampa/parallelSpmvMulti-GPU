@@ -215,10 +215,21 @@ int main(int argc, char *argv[])
         printf("In GPU: %d\n",gpu);
         if (meanNnzPerRow0[gpu] + parameter2Adjust*sd0[gpu] < basicSize) {
         	// these mean use scalar spmv
+
+        	// these mean use scalar spmv
+            if (meanNnzPerRow0[gpu] < (real) 4.0) {
+                block0[gpu].x=128;
+            } else if (meanNnzPerRow0[gpu]< (real) 14.5) {
+                block0[gpu].x=64;
+            } else {
+                block0[gpu].x=32;
+            } // end if //
+
             grid0[gpu].x = ( (n[gpu] + block0[gpu].x -1) /block0[gpu].x );
             printf("using scalar spmv for on matrix,  blockSize: [%d, %d] %f, %f\n",block0[gpu].x,block0[gpu].y, meanNnzPerRow0[gpu], sd0[gpu]) ;
         } else {
             // these mean use vector spmv
+            block0[gpu].x=basicSize;
             block0[gpu].y=MAXTHREADS/block0[gpu].x;
             grid0[gpu].x = ( (n[gpu] + block0[gpu].y - 1) / block0[gpu].y ) ;
         	sharedMemorySize0[gpu]=block0[gpu].x*block0[gpu].y*sizeof(real);
@@ -228,10 +239,18 @@ int main(int argc, char *argv[])
         if (ngpus > 1) {
             if (meanNnzPerRow1[gpu] + parameter2Adjust*sd1[gpu] < basicSize) {
             	// these mean use scalar spmv
+                if (meanNnzPerRow1[gpu] < (real) 4.0) {
+                    block1[gpu].x=128;
+                } else if (meanNnzPerRow1[gpu] < (real) 14.5) {
+                    block1[gpu].x=64;
+                } else {
+                    block1[gpu].x=32;
+                } // end if //
                 grid1[gpu].x = ( (n[gpu] + block1[gpu].x -1) /block1[gpu].x );
                 printf("using scalar spmv for off matrix, blockSize: [%d, %d] %f, %f\n",block1[gpu].x,block1[gpu].y, meanNnzPerRow1[gpu], sd1[gpu]) ;
             } else {
                 // these mean use vector spmv
+                block1[gpu].x=basicSize;
                 block1[gpu].y=MAXTHREADS/block1[gpu].x;
                 grid1[gpu].x = ( (n[gpu] + block1[gpu].y - 1) / block1[gpu].y ) ;
             	sharedMemorySize1[gpu]=block1[gpu].x*block1[gpu].y*sizeof(real);

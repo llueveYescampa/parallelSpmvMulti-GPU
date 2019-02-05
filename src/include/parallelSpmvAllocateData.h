@@ -55,10 +55,10 @@
 
     for (int gpu=0; gpu<ngpus; ++gpu) {
         
-        block0[gpu].x = basicSize;
+        block0[gpu].x = 1;
         block0[gpu].y = 1;
         block0[gpu].z = 1;
-        block1[gpu].x = basicSize;
+        block1[gpu].x = 1;
         block1[gpu].y = 1;
         block1[gpu].z = 1;
         
