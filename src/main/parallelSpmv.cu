@@ -229,7 +229,12 @@ int main(int argc, char *argv[])
             printf("using scalar spmv for on matrix,  blockSize: [%d, %d] %f, %f\n",block0[gpu].x,block0[gpu].y, meanNnzPerRow0[gpu], sd0[gpu]) ;
         } else {
             // these mean use vector spmv
-            block0[gpu].x=basicSize;
+
+            if (meanNnzPerRow0[gpu] > 10.0*basicSize) {
+                block0[gpu].x=2*basicSize;
+            }  else {
+                block0[gpu].x=basicSize;
+            } // end if //
             block0[gpu].y=MAXTHREADS/block0[gpu].x;
             grid0[gpu].x = ( (n[gpu] + block0[gpu].y - 1) / block0[gpu].y ) ;
         	sharedMemorySize0[gpu]=block0[gpu].x*block0[gpu].y*sizeof(real);
@@ -250,7 +255,14 @@ int main(int argc, char *argv[])
                 printf("using scalar spmv for off matrix, blockSize: [%d, %d] %f, %f\n",block1[gpu].x,block1[gpu].y, meanNnzPerRow1[gpu], sd1[gpu]) ;
             } else {
                 // these mean use vector spmv
-                block1[gpu].x=basicSize;
+                if (meanNnzPerRow1[gpu] > 10.0*basicSize) {
+                    //block0[gpu].x=2*basicSize;
+                    block1[gpu].x=basicSize;
+                }  else {
+                    //block0[gpu].x=basicSize;
+                    block1[gpu].x=basicSize;
+                } // end if //
+
                 block1[gpu].y=MAXTHREADS/block1[gpu].x;
                 grid1[gpu].x = ( (n[gpu] + block1[gpu].y - 1) / block1[gpu].y ) ;
             	sharedMemorySize1[gpu]=block1[gpu].x*block1[gpu].y*sizeof(real);
