@@ -215,8 +215,6 @@ int main(int argc, char *argv[])
         printf("In GPU: %d\n",gpu);
         if (meanNnzPerRow0[gpu] + parameter2Adjust*sd0[gpu] < basicSize) {
         	// these mean use scalar spmv
-
-        	// these mean use scalar spmv
             if (meanNnzPerRow0[gpu] < (real) 4.0) {
                 block0[gpu].x=128;
             } else if (meanNnzPerRow0[gpu]< (real) 14.5) {
@@ -229,7 +227,6 @@ int main(int argc, char *argv[])
             printf("using scalar spmv for on matrix,  blockSize: [%d, %d] %f, %f\n",block0[gpu].x,block0[gpu].y, meanNnzPerRow0[gpu], sd0[gpu]) ;
         } else {
             // these mean use vector spmv
-
             if (meanNnzPerRow0[gpu] > 10.0*basicSize) {
                 block0[gpu].x=2*basicSize;
             }  else {
