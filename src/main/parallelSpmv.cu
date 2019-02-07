@@ -215,9 +215,9 @@ int main(int argc, char *argv[])
         printf("In GPU: %d\n",gpu);
         if (meanNnzPerRow0[gpu] + parameter2Adjust*sd0[gpu] < basicSize) {
         	// these mean use scalar spmv
-            if (meanNnzPerRow0[gpu] < (real) 4.0) {
+            if (meanNnzPerRow0[gpu] < (real) 4.5) {
                 block0[gpu].x=128;
-            } else if (meanNnzPerRow0[gpu]< (real) 14.5) {
+            } else if (meanNnzPerRow0[gpu]< (real) 14.4) {
                 block0[gpu].x=64;
             } else {
                 block0[gpu].x=32;
@@ -241,9 +241,9 @@ int main(int argc, char *argv[])
         if (ngpus > 1) {
             if (meanNnzPerRow1[gpu] + parameter2Adjust*sd1[gpu] < basicSize) {
             	// these mean use scalar spmv
-                if (meanNnzPerRow1[gpu] < (real) 4.0) {
+                if (meanNnzPerRow1[gpu] < (real) 4.5) {
                     block1[gpu].x=128;
-                } else if (meanNnzPerRow1[gpu] < (real) 14.5) {
+                } else if (meanNnzPerRow1[gpu] < (real) 14.4) {
                     block1[gpu].x=64;
                 } else {
                     block1[gpu].x=32;
