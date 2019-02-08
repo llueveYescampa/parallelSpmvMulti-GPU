@@ -39,8 +39,8 @@
     int ***sendColumns=NULL;   // partially allocated inside createCommunicator.cu 
     // end of creatinng communicator data//
 
-    const int basicSize = 32;
-    const real parameter2Adjust = 0.075;
+    const int warpSize = 32;
+    const real parameter2Adjust = 0.15;
     size_t *sharedMemorySize0=NULL;
     size_t *sharedMemorySize1=NULL;
     

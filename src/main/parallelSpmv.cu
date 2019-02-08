@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 /////////////////////////////////////////////////////////////////////////
 
         printf("In GPU: %d\n",gpu);
-        if (meanNnzPerRow0[gpu] + parameter2Adjust*sd0[gpu] < basicSize) {
+        if (meanNnzPerRow0[gpu] < warpSize && parameter2Adjust*sd0[gpu] < warpSize) {
         	// these mean use scalar spmv
             if (meanNnzPerRow0[gpu] < (real) 4.5) {
                 block0[gpu].x=128;
@@ -227,10 +227,10 @@ int main(int argc, char *argv[])
             printf("using scalar spmv for on matrix,  blockSize: [%d, %d] %f, %f\n",block0[gpu].x,block0[gpu].y, meanNnzPerRow0[gpu], sd0[gpu]) ;
         } else {
             // these mean use vector spmv
-            if (meanNnzPerRow0[gpu] > 10.0*basicSize) {
-                block0[gpu].x=2*basicSize;
+            if (meanNnzPerRow0[gpu] > 10.0*warpSize) {
+                block0[gpu].x=2*warpSize;
             }  else {
-                block0[gpu].x=basicSize;
+                block0[gpu].x=warpSize;
             } // end if //
             block0[gpu].y=MAXTHREADS/block0[gpu].x;
             grid0[gpu].x = ( (n[gpu] + block0[gpu].y - 1) / block0[gpu].y ) ;
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
         } // end if // 
 
         if (ngpus > 1) {
-            if (meanNnzPerRow1[gpu] + parameter2Adjust*sd1[gpu] < basicSize) {
+            if (meanNnzPerRow1[gpu] < warpSize  && parameter2Adjust*sd1[gpu] < warpSize) {
             	// these mean use scalar spmv
                 if (meanNnzPerRow1[gpu] < (real) 4.5) {
                     block1[gpu].x=128;
@@ -252,12 +252,10 @@ int main(int argc, char *argv[])
                 printf("using scalar spmv for off matrix, blockSize: [%d, %d] %f, %f\n",block1[gpu].x,block1[gpu].y, meanNnzPerRow1[gpu], sd1[gpu]) ;
             } else {
                 // these mean use vector spmv
-                if (meanNnzPerRow1[gpu] > 10.0*basicSize) {
-                    //block0[gpu].x=2*basicSize;
-                    block1[gpu].x=basicSize;
+                if (meanNnzPerRow1[gpu] > 10.0*warpSize) {
+                    block1[gpu].x=2*warpSize;
                 }  else {
-                    //block0[gpu].x=basicSize;
-                    block1[gpu].x=basicSize;
+                    block1[gpu].x=warpSize;
                 } // end if //
 
                 block1[gpu].y=MAXTHREADS/block1[gpu].x;
