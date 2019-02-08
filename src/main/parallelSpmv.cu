@@ -112,8 +112,11 @@ int main(int argc, char *argv[])
         if(cuda_ret != cudaSuccess) FATAL("Unable to set gpu");
     
         //cuda_ret = cudaStreamCreateWithFlags(&stream0[gpu], cudaStreamDefault);
-        cuda_ret = cudaStreamCreateWithFlags(&stream[gpu], cudaStreamNonBlocking ) ;
-        if(cuda_ret != cudaSuccess) FATAL("Unable to create stream0 ");
+        cuda_ret = cudaStreamCreateWithFlags(&stream0[gpu], cudaStreamNonBlocking ) ;
+        if(cuda_ret != cudaSuccess) FATAL("Unable to create stream0");
+
+        cuda_ret = cudaStreamCreateWithFlags(&stream1[gpu], cudaStreamNonBlocking ) ;
+        if(cuda_ret != cudaSuccess) FATAL("Unable to create stream1");
         
         v[gpu] = (real *) malloc((n[gpu])*sizeof(real));
         w[gpu] = (real *) malloc((n[gpu])*sizeof(real));
@@ -278,12 +281,12 @@ int main(int argc, char *argv[])
         for (int gpu=0; gpu<ngpus; ++gpu) {
             cudaSetDevice(gpu);
         
-            cuda_ret = cudaMemset(w_d[gpu], 0, sizeof(real)*n[gpu] );
+            cuda_ret = cudaMemsetAsync(w_d[gpu], 0, sizeof(real)*n[gpu],stream0[gpu] );
             if(cuda_ret != cudaSuccess) FATAL("Unable to set device for matrix w_d[gpu]");
 
             cuda_ret = cudaBindTexture(NULL, xTex,   v_d[gpu],   n[gpu]           * sizeof(real));
             cuda_ret = cudaBindTexture(NULL, valTex, val_d[gpu], on_proc_nnz[gpu] * sizeof(real));
-            spmv<<<grid0[gpu], block0[gpu], sharedMemorySize0[gpu]>>>(w_d[gpu],  row_ptr_d[gpu], col_idx_d[gpu], n[gpu]);
+            spmv<<<grid0[gpu], block0[gpu], sharedMemorySize0[gpu],stream0[gpu]>>>(w_d[gpu],  row_ptr_d[gpu], col_idx_d[gpu], n[gpu]);
             cuda_ret = cudaUnbindTexture(xTex);
             cuda_ret = cudaUnbindTexture(valTex);
             
@@ -295,12 +298,12 @@ int main(int argc, char *argv[])
             for (int gpu=0; gpu<ngpus; ++gpu) {
                 cudaSetDevice(gpu);
             
-                cuda_ret = cudaMemcpyAsync(v_off_d[gpu], v_off[gpu], nColsOff[gpu]*sizeof(real),cudaMemcpyHostToDevice,stream[gpu] ) ;
+                cuda_ret = cudaMemcpyAsync(v_off_d[gpu], v_off[gpu], nColsOff[gpu]*sizeof(real),cudaMemcpyHostToDevice,stream1[gpu] ) ;
                 if(cuda_ret != cudaSuccess) FATAL("Unable to copy memory to device array v_off_d");
             
                 cuda_ret = cudaBindTexture(NULL, xTex,   v_off_d[gpu],   nColsOff[gpu]     * sizeof(real));
                 cuda_ret = cudaBindTexture(NULL, valTex, val_off_d[gpu], off_proc_nnz[gpu] * sizeof(real));
-                spmv<<<grid1[gpu], block1[gpu], sharedMemorySize1[gpu],stream[gpu] >>>(w_d[gpu],  row_ptr_off_d[gpu], col_idx_off_d[gpu], n[gpu]);
+                spmv<<<grid1[gpu], block1[gpu], sharedMemorySize1[gpu],stream1[gpu] >>>(w_d[gpu],  row_ptr_off_d[gpu], col_idx_off_d[gpu], n[gpu]);
                 cuda_ret = cudaUnbindTexture(xTex);
                 cuda_ret = cudaUnbindTexture(valTex);
                 
@@ -309,8 +312,9 @@ int main(int argc, char *argv[])
 
         for (int gpu=0; gpu<ngpus; ++gpu) {
             cudaSetDevice(gpu);
-            cudaStreamSynchronize(NULL);
-            cudaStreamSynchronize(stream[gpu]);
+            //cudaStreamSynchronize(NULL);
+            cudaStreamSynchronize(stream0[gpu]);
+            cudaStreamSynchronize(stream1[gpu]);
         } // end for //
     } // end for //
     

@@ -36,10 +36,12 @@
             
             free(recvSendCount[gpu]);            
         } // end if //
-        cudaStreamDestroy(stream[gpu]);
+        cudaStreamDestroy(stream0[gpu]);
+        cudaStreamDestroy(stream1[gpu]);
     } // end for /
     free(recvSendCount);
-    free(stream);
+    free(stream0);
+    free(stream1);
     
 
     free(v);
@@ -81,8 +83,6 @@
         free(row_ptr_off_d);
         free(col_idx_off_d);
         free(val_off_d);
-
-
         
         for (int proc=0; proc<ngpus; ++proc){
             for (int gpu=0; gpu<ngpus; ++gpu){
@@ -90,9 +90,6 @@
             } // end for /
             free(sendColumns[proc]);
         } // end for /
-        
-        
     } // end if //
-    
     free(sendColumns);
 
