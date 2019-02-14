@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
 /////////////////////////////////////////////////////////////////////////
 
         printf("In GPU: %d\n",gpu);
-        if (meanNnzPerRow0[gpu] < warpSize && parameter2Adjust*sd0[gpu] < warpSize) {
+        if (meanNnzPerRow0[gpu] < 10 && parameter2Adjust*sd0[gpu] < warpSize) {
         	// these mean use scalar spmv
             if (meanNnzPerRow0[gpu] < (real) 4.5) {
                 block0[gpu].x=128;
@@ -232,8 +232,10 @@ int main(int argc, char *argv[])
             // these mean use vector spmv
             if (meanNnzPerRow0[gpu] > 10.0*warpSize) {
                 block0[gpu].x=2*warpSize;
+            }  else if (meanNnzPerRow0[gpu] > 4.0*warpSize) {
+                block0[gpu].x=warpSize/2;
             }  else {
-                block0[gpu].x=warpSize;
+                block0[gpu].x=warpSize/4;
             } // end if //
             block0[gpu].y=MAXTHREADS/block0[gpu].x;
             grid0[gpu].x = ( (n[gpu] + block0[gpu].y - 1) / block0[gpu].y ) ;
@@ -242,7 +244,7 @@ int main(int argc, char *argv[])
         } // end if // 
 
         if (ngpus > 1) {
-            if (meanNnzPerRow1[gpu] < warpSize  && parameter2Adjust*sd1[gpu] < warpSize) {
+            if (meanNnzPerRow1[gpu] < 10  && parameter2Adjust*sd1[gpu] < warpSize) {
             	// these mean use scalar spmv
                 if (meanNnzPerRow1[gpu] < (real) 4.5) {
                     block1[gpu].x=128;
@@ -257,8 +259,10 @@ int main(int argc, char *argv[])
                 // these mean use vector spmv
                 if (meanNnzPerRow1[gpu] > 10.0*warpSize) {
                     block1[gpu].x=2*warpSize;
+                }  else if (meanNnzPerRow1[gpu] > 4.0*warpSize) {
+                    block1[gpu].x=warpSize/2;
                 }  else {
-                    block1[gpu].x=warpSize;
+                    block1[gpu].x=warpSize/4;
                 } // end if //
 
                 block1[gpu].y=MAXTHREADS/block1[gpu].x;
